@@ -16,4 +16,8 @@ public class EmailController {
     public String sendMail(@RequestBody EmailDetails details){
         return emailService.sendSimpleMail(details);
     }
+
+    public String sendMailWithAttachment(@RequestBody EmailDetails details){
+        return emailService.sendMailWithAttachment(details);
+    }
 }
