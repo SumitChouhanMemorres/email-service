@@ -1,6 +1,7 @@
 package com.springbootproject.emailservice.service;
 
 import com.springbootproject.emailservice.model.EmailDetails;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,11 +10,16 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
     @Value("${spring.mail.username}") private String sender;
     public String sendSimpleMail(EmailDetails details){
         try{
@@ -43,6 +49,21 @@ public class EmailService {
             javaMailSender.send(mimeMessage);
             return "Mail with Attachment sent succesfully";
         }catch(Exception e){
+            return "Error While Sending Mail!!";
+        }
+    }
+
+    public String sendEmailWithHtmlTemplate(String to, String subject, String templateName, Context context){
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, "UTF-8");
+        try{
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject(subject);
+            String htmlContent = templateEngine.process(templateName, context);
+            mimeMessageHelper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+            return "Mail Sent successfully with html page";
+        }catch(MessagingException e){
             return "Error While Sending Mail!!";
         }
     }
